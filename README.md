@@ -1407,3 +1407,72 @@ print(X_test.shape)
 
     (1460, 269)
     (1459, 269)
+# 📡 API
+
+Este proyecto incluye una API desarrollada con FastAPI para exponer el modelo predictivo como servicio.
+
+### Archivos relacionados
+
+- `src/api/main.py`: punto de entrada principal de la API.
+
+### Ejecución
+
+Para ejecutarla localmente:
+
+```bash
+uvicorn src.api.main:app --reload
+```
+
+Por defecto estará disponible en [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+### Endpoints disponibles
+
+- `GET /`: mensaje de bienvenida.
+- `POST /predict`: permite enviar un JSON con una lista de características para obtener predicciones.
+
+#### Ejemplo de petición:
+
+```json
+{
+  "features": [[0.25, 0.4, 0.35]]
+}
+```
+
+#### Ejemplo de respuesta:
+
+```json
+{
+  "predicciones": [173452.85]
+}
+```
+
+## 🧪 Pruebas
+
+El proyecto incluye pruebas unitarias para validar el funcionamiento de los módulos.
+
+### Estructura
+
+Las pruebas están en `tests/unit/`:
+- `test_models.py`: validación de entrenamiento, predicción y guardado del modelo.
+- `test_preprocesamiento.py`: validación del preprocesamiento de datos.
+
+### Cómo ejecutar
+
+Desde la raíz del proyecto:
+
+```bash
+pytest
+```
+
+Si ocurre un error `ModuleNotFoundError: No module named 'src'`, usar:
+
+```bash
+PYTHONPATH=src pytest
+```
+
+O agregar un archivo `pytest.ini` con:
+
+```ini
+[pytest]
+pythonpath = src
+```
