@@ -5,28 +5,38 @@ from sklearn.preprocessing import RobustScaler
 
 
 def cargar_datos(
-    train_path: str,
-    test_path: str
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Carga los archivos de entrenamiento y prueba."""
-    train = pd.read_csv(train_path)
-    test = pd.read_csv(test_path)
+    train_path: Optional[str] = None,
+    test_path: Optional[str] = None
+) -> Tuple[Optional[pd.DataFrame], Optional[pd.DataFrame]]:
+    """Carga los archivos de entrenamiento y prueba. Permite que uno sea None."""
+    train = pd.read_csv(train_path) if train_path is not None else None
+    test = pd.read_csv(test_path) if test_path is not None else None
     return train, test
+
+def cargar_archivo(path: str) -> pd.DataFrame:
+    """
+    Carga un solo archivo CSV y lo retorna como DataFrame.
+    """
+    return pd.read_csv(path)
 
 
 def igualar_tipos(
-    train: pd.DataFrame,
-    test: pd.DataFrame
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Corrige las diferencias de tipos entre train y test."""
+    train: Optional[pd.DataFrame] = None,
+    test: Optional[pd.DataFrame] = None
+) -> Tuple[Optional[pd.DataFrame], Optional[pd.DataFrame]]:
+    """Corrige las diferencias de tipos entre train y test, permitiendo que uno sea None."""
     float_cols = [
         "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF", "TotalBsmtSF",
         "BsmtFullBath", "BsmtHalfBath", "GarageCars", "GarageArea"
     ]
-    for col in float_cols:
-        if col in train.columns and col in test.columns:
-            train[col] = train[col].astype(float)
-            test[col] = test[col].astype(float)
+    if train is not None:
+        for col in float_cols:
+            if col in train.columns:
+                train[col] = train[col].astype(float)
+    if test is not None:
+        for col in float_cols:
+            if col in test.columns:
+                test[col] = test[col].astype(float)
     return train, test
 
 
@@ -34,14 +44,24 @@ def igualar_tipos(
 
 
 def unir_datasets(
-    train: pd.DataFrame,
-    test: pd.DataFrame
-) -> Tuple[pd.DataFrame, int]:
-    """Concatena train y test para preprocesarlos de forma conjunta."""
-    ntrain = train.shape[0]
-    train = train.drop("SalePrice", axis=1, errors="ignore")
-    full = pd.concat([train, test], axis=0, ignore_index=True)
-    return full, ntrain
+    train: Optional[pd.DataFrame] = None,
+    test: Optional[pd.DataFrame] = None
+) -> Tuple[Optional[pd.DataFrame], int]:
+    """Concatena train y test para preprocesarlos de forma conjunta. Permite que uno sea None."""
+    ntrain = 0
+    if train is not None and test is not None:
+        ntrain = train.shape[0]
+        train = train.drop("SalePrice", axis=1, errors="ignore")
+        full = pd.concat([train, test], axis=0, ignore_index=True)
+        return full, ntrain
+    elif train is not None:
+        ntrain = train.shape[0]
+        train = train.drop("SalePrice", axis=1, errors="ignore")
+        return train.copy(), ntrain
+    elif test is not None:
+        return test.copy(), ntrain
+    else:
+        return None, ntrain
 
 
 def limpiar_nulos(df: pd.DataFrame) -> pd.DataFrame:
